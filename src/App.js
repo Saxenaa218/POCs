@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import { Button } from 'antd';
+import Scheduler from './scheduler/Scheduler.jsx';
+// import DYKAdmin from './DYKAdmin';
 import './App.css';
 
-function App() {
+const App = () => {
+  const [visible, setVisible] = useState(true);
+  const handleVisible = () => {
+    setVisible(bool => !bool);
+  }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Button onClick={handleVisible}>Call Scheduler</Button>
+      <Scheduler {...{ visible, setVisible }}/>
+      {/* <DYKAdmin {...{ visible, setVisible }}/> */}
+    </>
   );
 }
-
 export default App;
