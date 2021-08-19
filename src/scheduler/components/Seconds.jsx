@@ -22,7 +22,7 @@ export default function Seconds(props) {
 
   const [options, setOptions] = useState();
   const [radioValue, setRadioValue] = useState('firstOption');
-  const [secondsExpression, setSecondsExpression] = useState('');
+  const [expression, setExpression] = useState('');
   const [cacheData, setCacheData] = useReducer(cacheDataReducer, cacheDataInitialValues);
 
   useEffect(() => {
@@ -30,8 +30,8 @@ export default function Seconds(props) {
   }, [])
 
   // useEffect(() => {
-  //   console.log(secondsExpression)
-  // }, [secondsExpression])
+  //   console.log(expression)
+  // }, [expression])
 
   // useEffect(() => {
   //   console.log(cacheData)
@@ -40,11 +40,12 @@ export default function Seconds(props) {
   function cacheDataReducer(state, action){
     switch(action.type) {
       case 'secondOption':
-        return { ...state, secondOption: action.payload };
+        // return { ...state, secondOption: action.payload };
       case 'thirdOption':
-        return { ...state, thirdOption: action.payload };
+        // return { ...state, thirdOption: action.payload };
       case 'fourthOption':
-        return { ...state, fourthOption: action.payload };
+        // return { ...state, fourthOption: action.payload };
+        return { ...state, [action.type]: action.payload };
       default:
         return { ...state };
     }
@@ -54,8 +55,8 @@ export default function Seconds(props) {
 
   const handleRadioValueChange = e => {
     const val = e.target.value;
-    const tempSecondsExpression = computeExpressionValue(val, cacheData[val])
-    setSecondsExpression(tempSecondsExpression);
+    const tempexpression = computeExpressionValue(val, cacheData[val])
+    setExpression(tempexpression);
     setRadioValue(val);
   }
 
@@ -72,40 +73,39 @@ export default function Seconds(props) {
       default:
         return data;
     }
-    return data;
   }
 
   const onCheckBoxGroupChange = (checkedValues) => {
     setCacheData({ type: 'thirdOption', payload: checkedValues })
-    setSecondsExpression(checkedValues.join(','))
+    setExpression(checkedValues.join(','))
     setRadioValue('thirdOption')
   }
 
   // handler for second option (Every seconds(s) starting at second) for first select option
   const handleSecondOptionsFirstOptionChange = (val) => {
     setCacheData({ type: 'secondOption', payload: [val, cacheData['secondOption'][1]] })
-    setSecondsExpression(`${cacheData['secondOption'][1]}/${val}`)
+    setExpression(`${cacheData['secondOption'][1]}/${val}`)
     setRadioValue('secondOption')
   }
 
   // // handler for second option (Every seconds(s) starting at second) for second select option
   const handleSecondOptionsSecondOptionChange = (val) => {
     setCacheData({ type: 'secondOption', payload: [cacheData['secondOption'][0], val] })
-    setSecondsExpression(`${val}/${cacheData['secondOption'][0]}`)
+    setExpression(`${val}/${cacheData['secondOption'][0]}`)
     setRadioValue('secondOption')
   }
 
   // handler for last option (Every second between second _ and second _) for first select option
   const handlefourthOptionsFirstOptionChange = val => {
     setCacheData({ type: 'fourthOption', payload: [val, cacheData['fourthOption'][1]] })
-    setSecondsExpression(`${val}-${cacheData['fourthOption'][1]}`)
+    setExpression(`${val}-${cacheData['fourthOption'][1]}`)
     setRadioValue('fourthOption')
   }
 
   // handler for last option (Every second between second _ and second _) for second select option
   const handlefourthOptionsSecondOptionChange = val => {
     setCacheData({ type: 'fourthOption', payload: [cacheData['fourthOption'][0], val] })
-    setSecondsExpression(`${cacheData['fourthOption'][0]}-${val}`)
+    setExpression(`${cacheData['fourthOption'][0]}-${val}`)
     setRadioValue('fourthOption')
   }
 
@@ -160,14 +160,14 @@ export default function Seconds(props) {
               margin: '0 0 -20px 5%'
             }}
           >
-            {<div>
+            <div>
               <Checkbox.Group
                 options={options}
                 value={cacheData['thirdOption']}
                 style={{ margin: '0 5px' }}
                 onChange={onCheckBoxGroupChange}
               />
-            </div>}
+            </div>
           </div>
         </Radio>
 
@@ -195,7 +195,7 @@ export default function Seconds(props) {
         </Radio>
 
       </Radio.Group>
-      <h2>{secondsExpression}</h2>
+      <h2>{expression}</h2>
     </div>
   )
 }

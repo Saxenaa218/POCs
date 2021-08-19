@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { Radio, Select, Checkbox } from 'antd';
-import { chunk } from 'lodash';
 
 const { Option } = Select;
 
 export default function Hours(props) {
-  const [options, setOptions] = useState();
+
+  const cacheDataInitialValues = {
+    'firstOption': '*',
+    'secondOption': [1, 0],
+    'thirdOption': [0],
+    'fourthOption': [0, 0]
+  }
+
   const hourArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
   const hourArr2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
   const radioStyle = {
@@ -13,55 +19,128 @@ export default function Hours(props) {
     height: '40px',
     lineHeight: '30px',
   }
+  
+  const [options, setOptions] = useState();
+  const [radioValue, setRadioValue] = useState('firstOption');
+  const [secondsExpression, setSecondsExpression] = useState('');
+  const [cacheData, setCacheData] = useReducer(cacheDataReducer, cacheDataInitialValues);
 
   useEffect(() => {
     setOptions(createOptions());
   }, [])
 
+  // useEffect(() => {
+  //   console.log(secondsExpression)
+  // }, [secondsExpression])
+
+  // useEffect(() => {
+  //   console.log(cacheData)
+  // }, [cacheData])
+
+  function cacheDataReducer(state, action){
+    switch(action.type) {
+      case 'secondOption':
+        return { ...state, secondOption: action.payload };
+      case 'thirdOption':
+        return { ...state, thirdOption: action.payload };
+      case 'fourthOption':
+        return { ...state, fourthOption: action.payload };
+      default:
+        return { ...state };
+    }
+  }
+
   const createOptions = () => hourArr.map(itm => ({ label: itm, value: itm }))
 
-  const onChange = e => {
-    console.log('radio checked', e.target.value);
+  const handleRadioValueChange = e => {
+    const val = e.target.value;
+    const tempSecondsExpression = computeExpressionValue(val, cacheData[val])
+    setSecondsExpression(tempSecondsExpression);
+    setRadioValue(val);
+  }
+
+  const computeExpressionValue = (type, data) => {
+    switch(type) {
+      case 'firstOption':
+        return "*";
+      case 'secondOption':
+        return `${data[1]}/${data[0]}`;
+      case 'thirdOption':
+        return data.join(',');
+      case 'fourthOption':
+        return `${data[0]}-${data[1]}`;
+      default:
+        return data;
+    }
   }
 
   const onCheckBoxGroupChange = (checkedValues) => {
-    console.log('checked = ', checkedValues);
+    setCacheData({ type: 'thirdOption', payload: checkedValues })
+    setSecondsExpression(checkedValues.join(','))
+    setRadioValue('thirdOption')
+  }
+
+  // handler for second option (Every seconds(s) starting at second) for first select option
+  const handleSecondOptionsFirstOptionChange = (val) => {
+    setCacheData({ type: 'secondOption', payload: [val, cacheData['secondOption'][1]] })
+    setSecondsExpression(`${cacheData['secondOption'][1]}/${val}`)
+    setRadioValue('secondOption')
+  }
+
+  // // handler for second option (Every seconds(s) starting at second) for second select option
+  const handleSecondOptionsSecondOptionChange = (val) => {
+    setCacheData({ type: 'secondOption', payload: [cacheData['secondOption'][0], val] })
+    setSecondsExpression(`${val}/${cacheData['secondOption'][0]}`)
+    setRadioValue('secondOption')
+  }
+
+  // handler for last option (Every second between second _ and second _) for first select option
+  const handlefourthOptionsFirstOptionChange = val => {
+    setCacheData({ type: 'fourthOption', payload: [val, cacheData['fourthOption'][1]] })
+    setSecondsExpression(`${val}-${cacheData['fourthOption'][1]}`)
+    setRadioValue('fourthOption')
+  }
+
+  // handler for last option (Every second between second _ and second _) for second select option
+  const handlefourthOptionsSecondOptionChange = val => {
+    setCacheData({ type: 'fourthOption', payload: [cacheData['fourthOption'][0], val] })
+    setSecondsExpression(`${cacheData['fourthOption'][0]}-${val}`)
+    setRadioValue('fourthOption')
   }
 
   return (
     <div>
       <Radio.Group 
-        defaultValue={1}
+        value={radioValue}
         style={{
           overflow: 'auto',
-          // height: '350px',
           width: '100%'
         }}
-        onChange={onChange} 
+        onChange={handleRadioValueChange}
       >
 
-        <Radio style={radioStyle} value={1}>
+        <Radio style={radioStyle} value='firstOption'>
           Every hour
         </Radio>
 
-        <Radio style={radioStyle} value={2}>
+        <Radio style={radioStyle} value='secondOption'>
           Every 
           <Select 
             size="small"
-            defaultValue={hourArr2[0]}
+            value={cacheData['secondOption'][0]}
             style={{ margin: '0 5px' }}
             dropdownMatchSelectWidth={false}
-            onChange={val => console.log(val)}
+            onChange={handleSecondOptionsFirstOptionChange}
           >
             {React.Children.toArray(hourArr2.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
           hour(s) starting at hour 
           <Select 
             size="small"
-            defaultValue={hourArr[0]}
+            value={cacheData['secondOption'][1]}
             style={{ margin: '0 5px' }}
             dropdownMatchSelectWidth={false}
-            onChange={val => console.log(val)}
+            onChange={handleSecondOptionsSecondOptionChange}
           >
             {React.Children.toArray(hourArr.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
@@ -72,7 +151,7 @@ export default function Hours(props) {
             display: 'block',
             lineHeight: '30px',
           }} 
-          value={3}
+          value='thirdOption'
         >
           Specific hour (choose one or many)
           <div 
@@ -80,41 +159,42 @@ export default function Hours(props) {
               margin: '0 0 -20px 5%'
             }}
           >
-            {chunk(options, 10)
-              .map(eachChunkArray => <div><Checkbox.Group
-                options={eachChunkArray} 
-                defaultValue={['Pear']} 
+            <div>
+              <Checkbox.Group
+                options={options}
+                value={cacheData['thirdOption']}
                 style={{ margin: '0 5px' }}
-                onChange={onCheckBoxGroupChange} 
-              /></div>)
-            }
+                onChange={onCheckBoxGroupChange}
+              />
+            </div>
           </div>
         </Radio>
 
-        <Radio style={radioStyle} value={4}>
+        <Radio style={radioStyle} value='fourthOption'>
           Every hour between hour 
           <Select 
             size="small"
-            defaultValue={hourArr[0]}
+            value={cacheData['fourthOption'][0]}
             style={{ margin: '0 5px' }}
             dropdownMatchSelectWidth={false}
-            onChange={val => console.log(val)}
+            onChange={handlefourthOptionsFirstOptionChange}
           >
             {React.Children.toArray(hourArr.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
           and hour 
           <Select 
             size="small"
-            defaultValue={hourArr[0]}
+            value={cacheData['fourthOption'][1]}
             style={{ margin: '0 5px' }}
             dropdownMatchSelectWidth={false}
-            onChange={val => console.log(val)}
+            onChange={handlefourthOptionsSecondOptionChange}
           >
             {React.Children.toArray(hourArr.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
         </Radio>
 
       </Radio.Group>
+      <h2>{secondsExpression}</h2>
     </div>
   )
 }

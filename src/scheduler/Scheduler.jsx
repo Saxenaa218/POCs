@@ -42,7 +42,7 @@ const Scheduler = (props) => {
 			}}
         >
         	<>
-                <Tabs defaultActiveKey="1" onChange={handleTabChange}>
+                <Tabs defaultActiveKey="4" onChange={handleTabChange}>
                     <TabPane tab="Seconds" key="1">
                         <Seconds />
                     </TabPane>
