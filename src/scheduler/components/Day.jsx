@@ -10,11 +10,24 @@ const radioStyle = {
 }
 
 export default function Day(props) {
+
+  const { setDay } = props;
+
   const monthArrNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
   const monthArrNumbersWithTh = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th', '13th', '14th', '15th', '16th', '17th', '18th', '19th', '20th', '21th', '22th', '23th', '24th', '25th', '26th', '27th', '28th', '29th', '30th', '31th'];
   const days = [1, 2, 3, 4, 5, 6, 7];
   const numberOfWeeks = ['1st', '2nd', '3rd', '4th', '5th'];
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  const shortFormedDayName = {
+    'Sunday': 'SUN', 
+    'Monday': 'MON', 
+    'Tuesday': 'TUE', 
+    'Wednesday': 'WED', 
+    'Thursday': 'THU', 
+    'Friday': 'FRI', 
+    'Saturday': 'SAT'
+  }
 
   const cacheDataInitialValues = {
     'firstOption': '*',
@@ -32,22 +45,17 @@ export default function Day(props) {
 
   const [options, setOptions] = useState();
   const [radioValue, setRadioValue] = useState('firstOption');
-  const [expression, setExpression] = useState('');
-  const [dayOfWeek, setDayOfWeek] = useState();
-  const [dayOfMonth, setDayOfMonth] = useState();
+  const [dayOfWeek, setDayOfWeek] = useState('*');
+  const [dayOfMonth, setDayOfMonth] = useState('?');
   const [cacheData, setCacheData] = useReducer(cacheDataReducer, cacheDataInitialValues);
 
   useEffect(() => {
     setOptions(createOptions());
   }, [])
 
-  // useEffect(() => {
-  //   console.log(expression)
-  // }, [expression])
-
-  // useEffect(() => {
-  //   console.log(cacheData)
-  // }, [cacheData])
+  useEffect(() => {
+    setDay(dayOfMonth, dayOfWeek)
+  }, [dayOfMonth, dayOfWeek])
 
   function cacheDataReducer(state, action){
     switch(action?.type) {
@@ -65,67 +73,68 @@ export default function Day(props) {
 
   const handleRadioValueChange = e => {
     const val = e.target.value;
-    const tempexpression = computeExpressionValue(val, cacheData[val])
-    if (tempexpression) setExpression(tempexpression);
+    computeExpressionValue(val, cacheData[val]);
     setRadioValue(val);
   }
 
   const computeExpressionValue = (type, data) => {
     switch(type) {
       case 'firstOption':
-        return "*";
-      case 'secondOption':
-        return `${data[1]}/${data[0]}`;
-      case 'thirdOption':
-        setDayOfMonth(`${data[1]}/${data[0]}`)
-        return `${data[1]}/${data[0]}`;
-      case 'fourthOption':
-        setDayOfWeek(data.join(','))
         setDayOfMonth('?');
-        return false;
+        setDayOfWeek('*');
+        break;
+      case 'secondOption':
+        setDayOfMonth('?');
+        setDayOfWeek(`${dayNames.indexOf(data[1])+1}/${days.indexOf(data[0])+1}`);
+        break;
+      case 'thirdOption':
+        setDayOfMonth(`${monthArrNumbersWithTh.indexOf(data[1])+1}/${monthArrNumbers.indexOf(data[0])+1}`)
+        setDayOfWeek('?');
+        break;
+      case 'fourthOption':
+        setDayOfWeek(data.map(each => shortFormedDayName[each]).join(','));
+        setDayOfMonth('?');
+        break;
       case 'fifthOption':
         setDayOfMonth(data.join(','))
         setDayOfWeek('?');
-        return false;
+        break;
       case 'sixthOption':
         setDayOfMonth('L');
         setDayOfWeek('?');
-        return false;
+        break;
       case 'seventhOption':
         setDayOfMonth('LW');
         setDayOfWeek('?');
-        return false;
+        break;
       case 'eighthOption': 
         setDayOfWeek(`${dayNames.indexOf(data)+1}L`);
         setDayOfMonth('?');
-        return false;
-        // return `${dayNames.indexOf(data)+1}L`;
+        break;
       case 'ninethOption':
         setDayOfMonth(`L-${monthArrNumbers.indexOf(data)+1}`);
         setDayOfWeek('?');
-        return false;
-        // return `L-${monthArrNumbers.indexOf(data)}`;
+        break;
       case 'tenthOption': 
         setDayOfMonth(`${monthArrNumbersWithTh.indexOf(data)+1}W`);
         setDayOfWeek('?');
-        return false;
-        // return `${monthArrNumbersWithTh.indexOf(data)}W`;
+        break;
       case 'eleventhOption':
-        setDayOfWeek(`${numberOfWeeks.indexOf(data[0])+1}#${dayNames.indexOf(data[1])+1}`)
+        setDayOfWeek(`${dayNames.indexOf(data[1])+1}#${numberOfWeeks.indexOf(data[0])+1}`)
         setDayOfMonth('?');
-        return false;
+        break;
       default:
-        return data;
+        break;
     }
   }
 
+  // handler for fourth and fifth Options
   const onCheckBoxGroupChange = (checkedValues, type) => {
     setCacheData({ type: type, payload: checkedValues })
-    // setExpression(checkedValues.join(','))
     setRadioValue(type)
     if (type === 'fourthOption') {
       setDayOfMonth('?');
-      setDayOfWeek(checkedValues.join(','));
+      setDayOfWeek(checkedValues.map(each => shortFormedDayName[each]).join(','));
     } else {
       setDayOfWeek('?');
       setDayOfMonth(checkedValues.join(','));
@@ -135,29 +144,17 @@ export default function Day(props) {
   // handler for second option (Every seconds(s) starting at second) for first select option
   const handleSecondOptionsFirstOptionChange = (val) => {
     setCacheData({ type: 'secondOption', payload: [val, cacheData['secondOption'][1]] })
-    setExpression(`${cacheData['secondOption'][1]}/${val}`)
+    setDayOfWeek(`${dayNames.indexOf(cacheData['secondOption'][1])+1}/${days.indexOf(val)+1}`)
+    setDayOfMonth('?')
     setRadioValue('secondOption')
   }
 
   // // handler for second option (Every seconds(s) starting at second) for second select option
   const handleSecondOptionsSecondOptionChange = (val) => {
     setCacheData({ type: 'secondOption', payload: [cacheData['secondOption'][0], val] })
-    setExpression(`${val}/${cacheData['secondOption'][0]}`)
+    setDayOfWeek(`${dayNames.indexOf(val)+1}/${days.indexOf(cacheData['secondOption'][0])+1}`)
+    setDayOfMonth('?')
     setRadioValue('secondOption')
-  }
-
-  // handler for last option (Every second between second _ and second _) for first select option
-  const handlefourthOptionsFirstOptionChange = val => {
-    setCacheData({ type: 'fourthOption', payload: [val, cacheData['fourthOption'][1]] })
-    setExpression(`${val}-${cacheData['fourthOption'][1]}`)
-    setRadioValue('fourthOption')
-  }
-
-  // handler for last option (Every second between second _ and second _) for second select option
-  const handlefourthOptionsSecondOptionChange = val => {
-    setCacheData({ type: 'fourthOption', payload: [cacheData['fourthOption'][0], val] })
-    setExpression(`${cacheData['fourthOption'][0]}-${val}`)
-    setRadioValue('fourthOption')
   }
 
   return (
@@ -208,7 +205,12 @@ export default function Day(props) {
             value={cacheData['thirdOption'][0]}
             style={{ margin: '0 5px' }}
             dropdownMatchSelectWidth={false}
-            onChange={val => console.log(val)}
+            onChange={val => {
+              setCacheData({ type: 'thirdOption', payload: [val, cacheData['thirdOption'][1]] })
+              setDayOfMonth(`${monthArrNumbersWithTh.indexOf(cacheData['thirdOption'][1])+1}/${monthArrNumbers.indexOf(val)+1}`)
+              setDayOfWeek('?')
+              setRadioValue('thirdOption')
+            }}
           >
             {React.Children.toArray(monthArrNumbers.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
@@ -218,7 +220,12 @@ export default function Day(props) {
             value={cacheData['thirdOption'][1]}
             style={{ margin: '0 5px' }}
             dropdownMatchSelectWidth={false}
-            onChange={val => console.log(val)}
+            onChange={val => {
+              setCacheData({ type: 'thirdOption', payload: [cacheData['thirdOption'][0], val] })
+              setDayOfMonth(`${monthArrNumbersWithTh.indexOf(val)+1}/${monthArrNumbers.indexOf(cacheData['thirdOption'][0])+1}`)
+              setDayOfWeek('?')
+              setRadioValue('thirdOption')
+            }}
           >
             {React.Children.toArray(monthArrNumbersWithTh.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
@@ -230,7 +237,7 @@ export default function Day(props) {
             display: 'block',
             lineHeight: '30px',
           }} 
-          value={4}
+          value="fourthOption"
         >
           Specific day of week (choose one or many)
           <div 
@@ -252,7 +259,7 @@ export default function Day(props) {
             display: 'block',
             lineHeight: '30px',
           }} 
-          value={5}
+          value="fifthOption"
         >
           Specific day of month (choose one or many)
           <div 
@@ -369,11 +376,6 @@ export default function Day(props) {
         </Radio>
 
       </Radio.Group>
-      <span>Day of month: {dayOfMonth}</span>
-      <br/>
-      <span>Day: {expression}</span>
-      <br/>
-      <span>Day of week: {dayOfWeek}</span>
     </div>
   )
 }

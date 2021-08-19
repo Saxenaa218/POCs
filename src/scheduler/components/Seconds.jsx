@@ -5,6 +5,8 @@ const { Option } = Select;
 
 export default function Seconds(props) {
 
+  const { setSeconds } = props;
+
   const cacheDataInitialValues = {
     'firstOption': '*',
     'secondOption': [1, 0],
@@ -21,30 +23,23 @@ export default function Seconds(props) {
   }
 
   const [options, setOptions] = useState();
-  const [radioValue, setRadioValue] = useState('firstOption');
-  const [expression, setExpression] = useState('');
+  const [radioValue, setRadioValue] = useState('thirdOption');
+  const [expression, setExpression] = useState(0);
   const [cacheData, setCacheData] = useReducer(cacheDataReducer, cacheDataInitialValues);
 
   useEffect(() => {
     setOptions(createOptions());
   }, [])
 
-  // useEffect(() => {
-  //   console.log(expression)
-  // }, [expression])
-
-  // useEffect(() => {
-  //   console.log(cacheData)
-  // }, [cacheData])
+  useEffect(() => {
+    setSeconds(expression);
+  }, [expression])
 
   function cacheDataReducer(state, action){
     switch(action.type) {
       case 'secondOption':
-        // return { ...state, secondOption: action.payload };
       case 'thirdOption':
-        // return { ...state, thirdOption: action.payload };
       case 'fourthOption':
-        // return { ...state, fourthOption: action.payload };
         return { ...state, [action.type]: action.payload };
       default:
         return { ...state };
@@ -195,7 +190,6 @@ export default function Seconds(props) {
         </Radio>
 
       </Radio.Group>
-      <h2>{expression}</h2>
     </div>
   )
 }

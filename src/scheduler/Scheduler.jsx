@@ -1,5 +1,5 @@
-import React from 'react'
-import { Modal, Form, Tabs } from 'antd'
+import React, { useState } from 'react'
+import { Modal, Form, Tabs, Button } from 'antd'
 import Seconds from './components/Seconds'
 import Minutes from './components/Minutes'
 import Hours from './components/Hours'
@@ -10,8 +10,11 @@ import Year from './components/Year'
 const { TabPane } = Tabs;
 
 const Scheduler = (props) => {
+	
 	const { visible, setVisible, form } = props;
 	const { validateFieldsAndScroll } = form;
+
+	const [cronExpression, setCronExpression] = useState(['0', '0', '0', '?', '*', '*', '*']);
 
 	const handleSubmit = e => {
 	    validateFieldsAndScroll((err, values) => {
@@ -24,6 +27,13 @@ const Scheduler = (props) => {
     const handleTabChange = key => {
         console.log(key);
     }
+
+	const setExpression = (firstValue, firstIndex, secondValue, secondIndex) => {
+		const tempExpression = Object.assign([], cronExpression);
+		tempExpression[firstIndex] = firstValue;
+		if (secondValue !== undefined && secondIndex !== undefined) tempExpression[secondIndex] = secondValue;
+		setCronExpression(tempExpression)
+	}
 
 	return (
         <Modal
@@ -40,26 +50,35 @@ const Scheduler = (props) => {
 			onCancel={() => {
 				setVisible(false)
 			}}
+			footer={
+				<div style={{ display: 'flex', justifyContent: 'space-between' }}>
+					<h3>Cron expression: <strong>{cronExpression.join(' ')}</strong></h3>
+					<div>
+						<Button>Cancel</Button>
+						<Button type="primary">Save</Button>
+					</div>
+				</div>
+			}
         >
         	<>
-                <Tabs defaultActiveKey="4" onChange={handleTabChange}>
+                <Tabs defaultActiveKey="1" onChange={handleTabChange}>
                     <TabPane tab="Seconds" key="1">
-                        <Seconds />
+                        <Seconds setSeconds={val => setExpression(val, 0)}/>
                     </TabPane>
                     <TabPane tab="Minutes" key="2">
-                        <Minutes />
+                        <Minutes setMinutes={val => setExpression(val, 1)}/>
                     </TabPane>
                     <TabPane tab="Hours" key="3">
-                        <Hours />
+                        <Hours setHours={val => setExpression(val, 2)}/>
                     </TabPane>
                     <TabPane tab="Day" key="4">
-                        <Day />
+                        <Day setDay={(dayOfMonth, dayOfWeek) => setExpression(dayOfMonth, 3, dayOfWeek, 5)}/>
                     </TabPane>
                     <TabPane tab="Month" key="5">
-                        <Month />
+                        <Month setMonth={val => setExpression(val, 4)}/>
                     </TabPane>
                     <TabPane tab="Year" key="6">
-                        <Year />
+                        <Year setYear={val => setExpression(val, 6)}/>
                     </TabPane>
                 </Tabs>
 		        {/*<Alert message={getInformation(scheduleType)} type="info" showIcon />*/}

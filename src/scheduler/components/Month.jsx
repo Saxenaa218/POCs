@@ -5,15 +5,32 @@ const { Option } = Select;
 
 export default function Month(props) {
 
+  const { setMonth } = props;
+
+  const shortFormedMonthName = {
+    'January': 'JAN', 
+    'February': 'FEB', 
+    'March': 'MAR', 
+    'April': 'APR', 
+    'May': 'MAY', 
+    'June': 'JUN', 
+    'July': 'JUL', 
+    'August': 'AUG', 
+    'September': 'SEP', 
+    'October': 'OCT', 
+    'November': 'NOV', 
+    'December': 'DEC'
+  }
+
   const cacheDataInitialValues = {
     'firstOption': '*',
     'secondOption': [1, 'January'],
-    'thirdOption': [0],
+    'thirdOption': [],
     'fourthOption': ['January', 'January']
   }
 
-  const monthArr = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const monthArr2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   const radioStyle = {
     display: 'block',
     height: '40px',
@@ -22,40 +39,34 @@ export default function Month(props) {
   
   const [options, setOptions] = useState();
   const [radioValue, setRadioValue] = useState('firstOption');
-  const [secondsExpression, setSecondsExpression] = useState('');
+  const [expression, setExpression] = useState('*');
   const [cacheData, setCacheData] = useReducer(cacheDataReducer, cacheDataInitialValues);
 
   useEffect(() => {
     setOptions(createOptions());
   }, [])
 
-  // useEffect(() => {
-  //   console.log(secondsExpression)
-  // }, [secondsExpression])
-
-  // useEffect(() => {
-  //   console.log(cacheData)
-  // }, [cacheData])
+  useEffect(() => {
+    setMonth(expression);
+  }, [expression])
 
   function cacheDataReducer(state, action){
     switch(action.type) {
       case 'secondOption':
-        return { ...state, secondOption: action.payload };
       case 'thirdOption':
-        return { ...state, thirdOption: action.payload };
       case 'fourthOption':
-        return { ...state, fourthOption: action.payload };
+        return { ...state, [action.type]: action.payload };
       default:
         return { ...state };
     }
   }
 
-  const createOptions = () => monthArr.map(itm => ({ label: itm, value: itm }))
+  const createOptions = () => monthNames.map(itm => ({ label: itm, value: itm }))
 
   const handleRadioValueChange = e => {
     const val = e.target.value;
-    const tempSecondsExpression = computeExpressionValue(val, cacheData[val])
-    setSecondsExpression(tempSecondsExpression);
+    const tempexpression = computeExpressionValue(val, cacheData[val])
+    setExpression(tempexpression);
     setRadioValue(val);
   }
 
@@ -64,11 +75,12 @@ export default function Month(props) {
       case 'firstOption':
         return "*";
       case 'secondOption':
-        return `${data[1]}/${data[0]}`;
+        return `${monthNames.indexOf(data[1])+1}/${monthNumbers.indexOf(data[0])+1}`;
       case 'thirdOption':
-        return data.join(',');
+        if (data.length) return data.map(each => shortFormedMonthName[each]).join(',');
+        else return '1';
       case 'fourthOption':
-        return `${data[0]}-${data[1]}`;
+        return `${monthNames.indexOf(data[0])+1}-${monthNames.indexOf(data[1])+1}`;
       default:
         return data;
     }
@@ -76,35 +88,35 @@ export default function Month(props) {
 
   const onCheckBoxGroupChange = (checkedValues) => {
     setCacheData({ type: 'thirdOption', payload: checkedValues })
-    setSecondsExpression(checkedValues.join(','))
+    setExpression(checkedValues.map(each => shortFormedMonthName[each]).join(','));
     setRadioValue('thirdOption')
   }
 
   // handler for second option (Every seconds(s) starting at second) for first select option
   const handleSecondOptionsFirstOptionChange = (val) => {
     setCacheData({ type: 'secondOption', payload: [val, cacheData['secondOption'][1]] })
-    setSecondsExpression(`${cacheData['secondOption'][1]}/${val}`)
+    setExpression(`${monthNames.indexOf(cacheData['secondOption'][1])+1}/${monthNumbers.indexOf(val)+1}`)
     setRadioValue('secondOption')
   }
 
   // // handler for second option (Every seconds(s) starting at second) for second select option
   const handleSecondOptionsSecondOptionChange = (val) => {
     setCacheData({ type: 'secondOption', payload: [cacheData['secondOption'][0], val] })
-    setSecondsExpression(`${val}/${cacheData['secondOption'][0]}`)
+    setExpression(`${monthNames.indexOf(val)+1}/${monthNumbers.indexOf(cacheData['secondOption'][0])+1}`)
     setRadioValue('secondOption')
   }
 
   // handler for last option (Every second between second _ and second _) for first select option
   const handlefourthOptionsFirstOptionChange = val => {
     setCacheData({ type: 'fourthOption', payload: [val, cacheData['fourthOption'][1]] })
-    setSecondsExpression(`${val}-${cacheData['fourthOption'][1]}`)
+    setExpression(`${monthNames.indexOf(val)+1}-${monthNames.indexOf(cacheData['fourthOption'][1])+1}`)
     setRadioValue('fourthOption')
   }
 
   // handler for last option (Every second between second _ and second _) for second select option
   const handlefourthOptionsSecondOptionChange = val => {
     setCacheData({ type: 'fourthOption', payload: [cacheData['fourthOption'][0], val] })
-    setSecondsExpression(`${cacheData['fourthOption'][0]}-${val}`)
+    setExpression(`${monthNames.indexOf(cacheData['fourthOption'][0])+1}-${monthNames.indexOf(val)+1}`)
     setRadioValue('fourthOption')
   }
 
@@ -132,7 +144,7 @@ export default function Month(props) {
             dropdownMatchSelectWidth={false}
             onChange={handleSecondOptionsFirstOptionChange}
           >
-            {React.Children.toArray(monthArr2.map(itm => <Option value={itm}>{itm}</Option>))}
+            {React.Children.toArray(monthNumbers.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
           month(s) starting in 
           <Select 
@@ -142,7 +154,7 @@ export default function Month(props) {
             dropdownMatchSelectWidth={false}
             onChange={handleSecondOptionsSecondOptionChange}
           >
-            {React.Children.toArray(monthArr.map(itm => <Option value={itm}>{itm}</Option>))}
+            {React.Children.toArray(monthNames.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
         </Radio>
 
@@ -179,7 +191,7 @@ export default function Month(props) {
             dropdownMatchSelectWidth={false}
             onChange={handlefourthOptionsFirstOptionChange}
           >
-            {React.Children.toArray(monthArr.map(itm => <Option value={itm}>{itm}</Option>))}
+            {React.Children.toArray(monthNames.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
           and 
           <Select 
@@ -189,12 +201,11 @@ export default function Month(props) {
             dropdownMatchSelectWidth={false}
             onChange={handlefourthOptionsSecondOptionChange}
           >
-            {React.Children.toArray(monthArr.map(itm => <Option value={itm}>{itm}</Option>))}
+            {React.Children.toArray(monthNames.map(itm => <Option value={itm}>{itm}</Option>))}
           </Select>
         </Radio>
 
       </Radio.Group>
-      <h2>{secondsExpression}</h2>
     </div>
   )
 }
