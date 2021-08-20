@@ -1,1 +1,11 @@
  @import '~antd/dist/antd.css';
+
+.ant-checkbox-group {
+    width: 70vw;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.ant-checkbox-group-item {
+    margin-top: 10px;
+}
