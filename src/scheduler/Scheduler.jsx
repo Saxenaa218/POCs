@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Modal, Form, Tabs, Button } from 'antd'
+import cronstrue from 'cronstrue'
 import Seconds from './components/Seconds'
 import Minutes from './components/Minutes'
 import Hours from './components/Hours'
@@ -51,8 +52,11 @@ const Scheduler = (props) => {
 				setVisible(false)
 			}}
 			footer={
-				<div style={{ display: 'flex', justifyContent: 'space-between' }}>
-					<h3>Cron expression: <strong>{cronExpression.join(' ')}</strong></h3>
+				<div style={{ display: 'grid', gridTemplateColumns: '80% 20%' }}>
+					<div style={{textAlign: 'left'}}>
+						<div>Expression: <h3><b>{cronExpression.join(' ')}</b></h3></div>
+						<div>Narration: <p><b>{cronstrue.toString(cronExpression.join(' '))}</b></p></div>
+					</div>
 					<div>
 						<Button>Cancel</Button>
 						<Button type="primary">Save</Button>
