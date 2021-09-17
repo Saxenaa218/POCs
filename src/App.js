@@ -1,20 +1,27 @@
-import React, { useState } from 'react';
-import { Button } from 'antd';
-import Scheduler from './scheduler/Scheduler.jsx';
+import React, { useState } from "react";
+import Scheduler from "./scheduler/Scheduler.jsx";
+import Schedule from "./scheduler/Schedule.jsx";
 // import DYKAdmin from './DYKAdmin';
-import './App.css';
+import "./App.css";
 
 const App = () => {
-  const [visible, setVisible] = useState(true);
-  const handleVisible = () => {
-    setVisible(bool => !bool);
-  }
+  const [visible, setVisible] = useState(false);
+  const [cronExpression, setCronExpression] = useState([
+    "0",
+    "0",
+    "0",
+    "?",
+    "*",
+    "*",
+    "*",
+  ]);
   return (
-    <>
-      <Button onClick={handleVisible}>Call Scheduler</Button>
-      <Scheduler {...{ visible, setVisible }}/>
-      {/* <DYKAdmin {...{ visible, setVisible }}/> */}
-    </>
+    <React.Fragment>
+      <Schedule {...{ setVisible, cronExpression }} />
+      {visible && <Scheduler
+        {...{ setVisible, cronExpression, setCronExpression }}
+      />}
+    </React.Fragment>
   );
-}
+};
 export default App;
