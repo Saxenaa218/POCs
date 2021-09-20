@@ -14,18 +14,17 @@ const formItemLayout = {
   },
 };
 
+const modules = ["Datalayer", "Do You Know"];
+const requestMethods = ["Get", "Post"];
+const authRequired = ["Yes", "No"];
+const dateFormat = 'DD-MM-YYYY';
+const timeFormat = 'hh:mm:ss';
+
 const { Option } = Select;
 
 const Schedule = (props) => {
-  console.log(props)
   const { form, cronExpression, setVisible } = props;
   const { getFieldDecorator, validateFieldsAndScroll, getFieldValue } = form;
-
-  const modules = ["Datalayer", "Do You Know"];
-  const requestMethods = ["Get", "Post"];
-  const authRequired = ["Yes", "No"];
-  const dateFormat = 'DD-MM-YYYY';
-  const timeFormat = 'hh:mm:ss';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -60,19 +59,19 @@ const Schedule = (props) => {
         <Form.Item label="Scheduler name">
           {getFieldDecorator("name", {
             rules: [{ required: true, message: "Enter scheduler name" }],
-          })(<Input placeholder="Enter scheduler name" />)}
+          })(<Input placeholder="Enter scheduler name" style={{ width: '400px' }} />)}
         </Form.Item>
         <Form.Item label="Description">
           {getFieldDecorator("description", {
             rules: [{ required: false, message: "Enter description" }],
-          })(<Input placeholder="Enter description" />)}
+          })(<Input placeholder="Enter description" style={{ width: '400px' }} />)}
         </Form.Item>
         <Form.Item label="Module">
           {getFieldDecorator("module", {
             initialValue: modules[0],
             rules: [{ required: true, message: "Please input your Password!" }],
           })(
-            <Select>
+            <Select style={{ width: '400px' }}>
               {modules.map((itm) => (
                 <Option value={itm} key={itm}>
                   {itm}
@@ -84,7 +83,7 @@ const Schedule = (props) => {
         <Form.Item label="Url">
           {getFieldDecorator("url", {
             rules: [{ required: true, message: "Please input your Password!" }],
-          })(<Input placeholder="Url" />)}
+          })(<Input placeholder="Url" style={{ width: '400px' }} />)}
         </Form.Item>
         <Form.Item label="Frequency">
           {getFieldDecorator("frequency", {
@@ -212,7 +211,7 @@ const Schedule = (props) => {
             initialValue: 'Post',
             rules: [{ required: true, message: "Please select your Request method!" }],
           })(
-            <Select>
+            <Select style={{ width: '400px' }}>
               {requestMethods.map((itm) => (
                 <Option value={itm} key={itm}>
                   {itm}
@@ -226,7 +225,7 @@ const Schedule = (props) => {
             initialValue: 'Yes',
             rules: [{ required: true, message: "Please select any field!" }],
           })(
-            <Select>
+            <Select style={{ width: '400px' }}>
               {authRequired.map((itm) => (
                 <Option value={itm} key={itm}>
                   {itm}
@@ -238,7 +237,7 @@ const Schedule = (props) => {
         <Form.Item label="Request parameter">
           {getFieldDecorator("requestParameter", {
             rules: [{ required: true, message: "Please input your Request parameter!" }],
-          })(<Input.TextArea placeholder="Request parameter" />)}
+          })(<Input.TextArea placeholder="Request parameter" style={{ width: '400px' }} />)}
         </Form.Item>
         <Form.Item wrapperCol={{ offset: 8 }}>
           <Button htmlType="submit" type="primary" >Save</Button>
